@@ -1,6 +1,6 @@
 import matplotlib
 matplotlib.use('Agg')
-import os, sys
+import sys
 import yaml
 from argparse import ArgumentParser
 from tqdm import tqdm
@@ -10,11 +10,11 @@ import numpy as np
 from skimage.transform import resize
 from skimage import img_as_ubyte
 import torch
-from sync_batchnorm import DataParallelWithCallback
+from collab_source.sync_batchnorm import DataParallelWithCallback
 
-from modules.generator import OcclusionAwareGenerator
-from modules.keypoint_detector import KPDetector
-from animate import normalize_kp
+from collab_source.modules.generator import OcclusionAwareGenerator
+from collab_source.modules.keypoint_detector import KPDetector
+from collab_source.animate import normalize_kp
 from scipy.spatial import ConvexHull
 
 

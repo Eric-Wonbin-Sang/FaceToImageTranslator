@@ -8,17 +8,17 @@ from argparse import ArgumentParser
 from time import gmtime, strftime
 from shutil import copy
 
-from frames_dataset import FramesDataset
+from collab_source.frames_dataset import FramesDataset
 
-from modules.generator import OcclusionAwareGenerator
-from modules.discriminator import MultiScaleDiscriminator
-from modules.keypoint_detector import KPDetector
+from collab_source.modules.generator import OcclusionAwareGenerator
+from collab_source.modules.discriminator import MultiScaleDiscriminator
+from collab_source.modules.keypoint_detector import KPDetector
 
 import torch
 
-from train import train
-from reconstruction import reconstruction
-from animate import animate
+from collab_source.train import train
+from collab_source.reconstruction import reconstruction
+from collab_source.animate import animate
 
 if __name__ == "__main__":
     

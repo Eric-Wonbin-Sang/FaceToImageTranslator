@@ -2,7 +2,7 @@ import pygame
 import numpy
 from matplotlib import image
 from skimage.transform import resize
-from demo import load_checkpoints
+from collab_source.demo import load_checkpoints
 from skimage import img_as_ubyte
 import cv2
 import datetime
@@ -10,9 +10,9 @@ import datetime
 import torch
 import numpy as np
 from tqdm import tqdm
-from animate import normalize_kp
+from collab_source.animate import normalize_kp
 
-from General import  Constants
+from collab_source.General import Constants
 
 
 def make_animation(source_image, driving_video, generator, kp_detector, relative=True, adapt_movement_scale=True, cpu=False):
@@ -73,14 +73,14 @@ def show_numpy_array(np_array, display, x=0, y=0, x_scale=1.0, y_scale=1.0):
     display.blit(pygame_surface, (x, y))
 
 
-def get_webcam_frame(cap):
+def get_webcam_frame(cap, upside_down=False):
     ret, frame = cap.read()
-    frame = cv2.flip(frame, -1)
+    frame = cv2.flip(frame, 1)
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     frame = cv2.resize(frame, (int(frame.shape[1] * .6), int(frame.shape[0] * .6)))
     x = 75
     w = 256
-    y = 0
+    y = 0 + 40
     h = 256
     frame = frame[y:y + h, x:x + w]
     return frame
@@ -99,15 +99,19 @@ def main():
     clock = pygame.time.Clock()
     run = True
 
-    cap = cv2.VideoCapture(0)
-    face_image_path = "a_face_test.png"
+    cap = cv2.VideoCapture(2)
+    upside_down = False
+
+    face_image_path = "C:/Users/ericw/Desktop/Screenshot 2021-02-04 193704.png"
     source_image = image.imread(face_image_path)
     resized_source_image = resize(source_image, (256, 256))[..., :3]
 
     temp_face_np_array = (resize(image.imread("s_face_test.jpg"), (256, 256))[..., :3] * 255).astype('uint8')
 
-    run_with_cpu = True
-    generator, kp_detector = load_checkpoints(config_path='config/vox-256.yaml', checkpoint_path=Constants.secrets_dir + '/FaceToImageTranslator/vox-cpk.pth.tar', cpu=run_with_cpu)
+    print(torch.cuda.is_available())
+    print(torch.cuda.device_count())
+    run_with_cpu = False
+    generator, kp_detector = load_checkpoints(config_path='collab_source/config/vox-256.yaml', checkpoint_path=Constants.secrets_dir + '/FaceToImageTranslator/vox-cpk.pth.tar', cpu=run_with_cpu)
 
     while run:
         for event in pygame.event.get():
@@ -116,7 +120,7 @@ def main():
 
         display.fill(white)
 
-        webcam_frame = get_webcam_frame(cap)
+        webcam_frame = get_webcam_frame(cap, upside_down=upside_down)
         # webcam_frame = temp_face_np_array
 
         show_numpy_array(webcam_frame, display, x=30, y=30, x_scale=1, y_scale=1)

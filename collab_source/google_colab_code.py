@@ -5,9 +5,7 @@ import imageio
 import numpy as np
 from matplotlib import image
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 from skimage.transform import resize
-from IPython.display import HTML
 
 import cv2
 
@@ -38,13 +36,13 @@ def display(source, driving, generated=None):
 # display(source_image, driving_video)
 
 # ----------------------------------------------
-from demo import load_checkpoints
+from collab_source.demo import load_checkpoints
 generator, kp_detector = load_checkpoints(config_path='config/vox-256.yaml',
                                           checkpoint_path='vox-cpk.pth.tar',
                                           cpu=True)
 # ----------------------------------------------
 
-from demo import make_animation
+from collab_source.demo import make_animation
 from skimage import img_as_ubyte
 
 predictions = make_animation(source_image, driving_video, generator, kp_detector, relative=True, cpu=True)

@@ -2,10 +2,10 @@ import os
 from tqdm import tqdm
 import torch
 from torch.utils.data import DataLoader
-from logger import Logger, Visualizer
+from collab_source.logger import Logger, Visualizer
 import numpy as np
 import imageio
-from sync_batchnorm import DataParallelWithCallback
+from collab_source.sync_batchnorm import DataParallelWithCallback
 
 
 def reconstruction(config, generator, kp_detector, checkpoint, log_dir, dataset):
