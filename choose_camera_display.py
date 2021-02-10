@@ -11,7 +11,7 @@ from tqdm import tqdm
 from collab_source.animate import normalize_kp
 
 from Classes import Camera, Image, PygameHelper
-from PygameClasses import EasyRect, EasyText
+from PygameClasses import EasyRect, EasyText, PygameMouse
 
 from General import Constants, Functions
 
@@ -64,6 +64,24 @@ def get_camera_list():
     return camera_list
 
 
+def show_cameras(camera_list, rect_list, display):
+    for i, camera in enumerate(camera_list):
+        temp_rect = rect_list[i]
+        temp_image = camera.get_webcam_image()
+
+        new_width = temp_rect.width
+        new_height = (new_width / temp_image.width) * temp_image.height
+        PygameHelper.show_numpy_array(
+            (255 * camera.get_webcam_image().update(
+                width=new_width,
+                height=new_height
+            ).get_image_np()),
+            display,
+            x=temp_rect.x - temp_rect.width / 2,
+            y=temp_rect.y - temp_rect.height / 2 + (temp_rect.height - new_height) / 2
+        )
+
+
 def main():
 
     pygame.init()
@@ -79,16 +97,20 @@ def main():
         Camera.Camera(index=i) for i in [
             0,
             # 1,
-            2,
+            # 2,
             # 3
         ]
     ]
 
+    mouse = PygameMouse.Mouse()
     choose_text = get_choose_text()
     rect_list = get_rect_list(len(camera_list))
     draw_list = [choose_text, *rect_list]
 
+    stage = 0
     loop_count = 0
+    main_camera = None
+
     while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -99,27 +121,25 @@ def main():
 
         display.fill(background_color)
 
-        choose_text.update_coordinates(x=display_width/2, y=display_width/18, size=display_width/16)
-        update_rect_list_to_rows(rect_list, 3, display_width, choose_text)
+        if stage == 0:
+            for i, rect in enumerate(rect_list):
+                if rect.is_left_clicked(mouse):
+                    stage += 1
+                    main_camera = camera_list[i]
+                    # print(i, rect.is_left_clicked(mouse))
 
-        for draw in draw_list:
-            draw.draw(display)
+            choose_text.update_coordinates(x=display_width/2, y=display_width/18, size=display_width/16)
+            update_rect_list_to_rows(rect_list, 3, display_width, choose_text)
 
-        for i, camera in enumerate(camera_list):
-            temp_rect = rect_list[i]
+            for draw in draw_list:
+                draw.draw(display)
+            show_cameras(camera_list, rect_list, display)
 
-            temp_image = camera.get_webcam_image()
-            print(temp_image.width, temp_image.height, temp_rect.width, temp_rect.height)
-            print((temp_image.height / temp_image.width) * ((temp_rect.width * .9)/temp_rect.height))
-            PygameHelper.show_numpy_array(
-                (255 * camera.get_webcam_image().update(
-                    width=temp_rect.width * .9,
-                    height=(temp_image.height / temp_image.width) * ((temp_rect.width * .9)/temp_rect.height)
-                ).get_image_np()),
-                display, x=temp_rect.x - temp_rect.width/2, y=temp_rect.y - temp_rect.height/2, x_scale=1, y_scale=1
-            )
+        if stage == 1:
+            print(main_camera)
 
         pygame.display.update()
+        mouse.update()
         print("loop: {}".format(loop_count))
         loop_count += 1
 

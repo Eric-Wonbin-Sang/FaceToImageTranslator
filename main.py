@@ -11,7 +11,7 @@ from tqdm import tqdm
 from collab_source.animate import normalize_kp
 
 from Classes import Camera, Image, PygameHelper
-from PygameClasses import EasyRect, EasyText
+from PygameClasses import EasyRect, EasyText, PygameMouse
 
 from General import Constants
 
@@ -76,12 +76,12 @@ def main():
     clock = pygame.time.Clock()
     run = True
 
-    camera = Camera.Camera(index=2, upside_down=False)
+    camera = Camera.Camera(index=0, upside_down=False)
 
-    warper_image = Image.Image(file_path="face_sources/Screenshot 2021-02-04 193704.png", width=256, height=256)
+    warper_image = Image.Image(file_path="face_sources/a_face_test.png", width=256, height=256)
     pseudo_webcam_image = Image.Image(file_path="face_sources/s_face_test.jpg", width=256, height=256)
 
-    run_with_cpu = False
+    run_with_cpu = True
     generator, kp_detector = load_checkpoints(config_path='collab_source/config/vox-256.yaml', checkpoint_path=Constants.secrets_dir + '/FaceToImageTranslator/vox-cpk.pth.tar', cpu=run_with_cpu)
 
     while run:
@@ -94,7 +94,9 @@ def main():
         webcam_image = camera.get_webcam_image()
         # webcam_image = pseudo_webcam_image.image_np
 
-        PygameHelper.show_numpy_array(webcam_image.image_np, display, x=30, y=30, x_scale=1, y_scale=1)
+        temp_image = Image.resize_wh((255 * webcam_image.image_np), 255, 255)
+
+        PygameHelper.show_numpy_array(temp_image, display, x=30, y=30, x_scale=1, y_scale=1)
         warper_image.to_pygame_display(display, x=350, y=30)
 
         start_datetime = datetime.datetime.now()

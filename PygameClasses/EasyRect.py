@@ -30,8 +30,16 @@ class EasyRect(Rect):
         self.x = x
         self.y = y
 
-    def is_mouse_clicked(self, mouse):
-        return self.x < mouse.x < self.x + self.width and self.y < mouse.y < self.y + self.height and mouse.left_click
+    def is_hovered(self, mouse):
+        if self.draw_center:
+            return self.x - self.width/2 < mouse.x < self.x + self.width/2 and self.y - self.height/2 < mouse.y < self.y + self.height/2
+        return self.x < mouse.x < self.x + self.width and self.y < mouse.y < self.y + self.height
+
+    def is_left_clicked(self, mouse):
+        return self.is_hovered(mouse) and mouse.left_click
+
+    def is_right_clicked(self, mouse):
+        return self.is_hovered(mouse) and mouse.right_click
 
     def draw(self, screen):
         if self.draw_center:
