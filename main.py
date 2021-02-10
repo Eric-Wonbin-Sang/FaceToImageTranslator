@@ -1,10 +1,8 @@
+import cv2
 import pygame
-import numpy
-from matplotlib import image
 from skimage.transform import resize
 from collab_source.demo import load_checkpoints
 from skimage import img_as_ubyte
-import cv2
 import datetime
 
 import torch
@@ -12,7 +10,10 @@ import numpy as np
 from tqdm import tqdm
 from collab_source.animate import normalize_kp
 
-from collab_source.General import Constants
+from Classes import Camera, Image, PygameHelper
+from PygameClasses import EasyRect, EasyText
+
+from General import Constants
 
 
 def make_animation(source_image, driving_video, generator, kp_detector, relative=True, adapt_movement_scale=True, cpu=False):
@@ -59,39 +60,15 @@ def get_prediction_np_array(source_image, driver, generator, kp_detector, relati
 
 
 def get_face_warp(webcam_frame, source_image, run_with_cpu, generator, kp_detector):
-
     driving_frame = resize(webcam_frame, (256, 256))[..., :3]
-
     prediction = get_prediction_np_array(source_image, driving_frame, generator, kp_detector, relative=False, adapt_movement_scale=True, cpu=run_with_cpu)
     return img_as_ubyte(prediction)
-
-
-def show_numpy_array(np_array, display, x=0, y=0, x_scale=1.0, y_scale=1.0):
-    np_array = cv2.resize(np_array, (int(np_array.shape[1] * x_scale), int(np_array.shape[0] * y_scale)))
-    np_array = numpy.rot90(np_array)
-    pygame_surface = pygame.surfarray.make_surface(np_array)
-    display.blit(pygame_surface, (x, y))
-
-
-def get_webcam_frame(cap, upside_down=False):
-    ret, frame = cap.read()
-    frame = cv2.flip(frame, 1)
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    frame = cv2.resize(frame, (int(frame.shape[1] * .6), int(frame.shape[0] * .6)))
-    x = 75
-    w = 256
-    y = 0 + 40
-    h = 256
-    frame = frame[y:y + h, x:x + w]
-    return frame
 
 
 def main():
     pygame.init()
 
-    display_width = 1000
-    display_height = 320
-
+    display_width, display_height = 1000, 320
     display = pygame.display.set_mode((display_width, display_height))
 
     white = (0, 0, 255)
@@ -99,17 +76,11 @@ def main():
     clock = pygame.time.Clock()
     run = True
 
-    cap = cv2.VideoCapture(2)
-    upside_down = False
+    camera = Camera.Camera(index=2, upside_down=False)
 
-    face_image_path = "C:/Users/ericw/Desktop/Screenshot 2021-02-04 193704.png"
-    source_image = image.imread(face_image_path)
-    resized_source_image = resize(source_image, (256, 256))[..., :3]
+    warper_image = Image.Image(file_path="face_sources/Screenshot 2021-02-04 193704.png", width=256, height=256)
+    pseudo_webcam_image = Image.Image(file_path="face_sources/s_face_test.jpg", width=256, height=256)
 
-    temp_face_np_array = (resize(image.imread("s_face_test.jpg"), (256, 256))[..., :3] * 255).astype('uint8')
-
-    print(torch.cuda.is_available())
-    print(torch.cuda.device_count())
     run_with_cpu = False
     generator, kp_detector = load_checkpoints(config_path='collab_source/config/vox-256.yaml', checkpoint_path=Constants.secrets_dir + '/FaceToImageTranslator/vox-cpk.pth.tar', cpu=run_with_cpu)
 
@@ -120,15 +91,15 @@ def main():
 
         display.fill(white)
 
-        webcam_frame = get_webcam_frame(cap, upside_down=upside_down)
-        # webcam_frame = temp_face_np_array
+        webcam_image = camera.get_webcam_image()
+        # webcam_image = pseudo_webcam_image.image_np
 
-        show_numpy_array(webcam_frame, display, x=30, y=30, x_scale=1, y_scale=1)
-        show_numpy_array((resized_source_image * 255).astype('uint8'), display, x=350, y=30, x_scale=1, y_scale=1)
+        PygameHelper.show_numpy_array(webcam_image.image_np, display, x=30, y=30, x_scale=1, y_scale=1)
+        warper_image.to_pygame_display(display, x=350, y=30)
 
         start_datetime = datetime.datetime.now()
-        temp = get_face_warp(webcam_frame=webcam_frame, source_image=resized_source_image, run_with_cpu=run_with_cpu, generator=generator, kp_detector=kp_detector)
-        show_numpy_array(temp, display, x=670, y=30, x_scale=1, y_scale=1)
+        temp = get_face_warp(webcam_frame=webcam_image.image_np, source_image=warper_image.image_np, run_with_cpu=run_with_cpu, generator=generator, kp_detector=kp_detector)
+        PygameHelper.show_numpy_array(temp, display, x=670, y=30, x_scale=1, y_scale=1)
         end_datetime = datetime.datetime.now()
         print("generation speed (in seconds) target: {} | actual: {}".format(round(1/30, 3), (end_datetime - start_datetime).microseconds/1000000))
 
