@@ -5,3 +5,4 @@ projects_dir = "/".join(project_dir.split("/")[:-1])
 secrets_dir = projects_dir + "/" + "0 - Secrets"
 
 image_target_height, image_target_width = 256, 256
+# image_target_height, image_target_width = 600, 600

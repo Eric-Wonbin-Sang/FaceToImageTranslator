@@ -76,9 +76,9 @@ def main():
     clock = pygame.time.Clock()
     run = True
 
-    camera = Camera.Camera(index=2, upside_down=False)
+    camera = Camera.Camera(index=1, upside_down=False)
 
-    warper_image = Image.Image(file_path="C:/Users/ericw/Desktop/justin.png", width=256, height=256)
+    warper_image = Image.Image(file_path="face_sources/s_face_test.jpg", width=256, height=256)
     pseudo_webcam_image = Image.Image(file_path="face_sources/s_face_test.jpg", width=256, height=256)
 
     run_with_cpu = False
@@ -91,18 +91,18 @@ def main():
 
         display.fill(white)
 
-        # webcam_image = camera.get_webcam_image()
+        webcam_image = camera.get_webcam_image()
         # webcam_image = pseudo_webcam_image.image_np
 
-        PygameHelper.show_numpy_array(webcam_image.image_np, display, x=30, y=30, x_scale=1, y_scale=1)
+        PygameHelper.show_numpy_array(webcam_image.image_np*255, display, x=30, y=30, x_scale=1, y_scale=1)
 
-        # warper_image.to_pygame_display(display, x=350, y=30)
+        warper_image.to_pygame_display(display, x=350, y=30)
 
-        # start_datetime = datetime.datetime.now()
-        # temp = get_face_warp(webcam_frame=webcam_image.image_np, source_image=warper_image.image_np, run_with_cpu=run_with_cpu, generator=generator, kp_detector=kp_detector)
-        # PygameHelper.show_numpy_array(temp, display, x=670, y=30, x_scale=1, y_scale=1)
-        # end_datetime = datetime.datetime.now()
-        # print("generation speed (in seconds) target: {} | actual: {}".format(round(1/30, 3), (end_datetime - start_datetime).microseconds/1000000))
+        start_datetime = datetime.datetime.now()
+        temp = get_face_warp(webcam_frame=webcam_image.image_np, source_image=warper_image.image_np, run_with_cpu=run_with_cpu, generator=generator, kp_detector=kp_detector)
+        PygameHelper.show_numpy_array(temp, display, x=670, y=30, x_scale=1, y_scale=1)
+        end_datetime = datetime.datetime.now()
+        print("FPS: {}".format(1000000/(end_datetime - start_datetime).microseconds))
 
         pygame.display.update()
         # clock.tick(60)
