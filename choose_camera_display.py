@@ -114,7 +114,7 @@ def main():
             PygameHelper.show_numpy_array(
                 (255 * camera.get_webcam_image().update(
                     width=temp_rect.width * .9,
-                    height=(temp_image.height / temp_image.width) * ((temp_rect.width * .9)/temp_rect.height)
+                    height=temp_rect.height
                 ).get_image_np()),
                 display, x=temp_rect.x - temp_rect.width/2, y=temp_rect.y - temp_rect.height/2, x_scale=1, y_scale=1
             )
@@ -124,4 +124,5 @@ def main():
         loop_count += 1
 
 
-main()
+if __name__ == '__main__':
+    main()
