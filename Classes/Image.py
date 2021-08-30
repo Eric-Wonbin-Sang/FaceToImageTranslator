@@ -44,7 +44,7 @@ class Image:
 
 
 def resize_wh(image_np, width, height):
-    return sk_resize(image_np, (int(width), int(height)))[..., :3]
+    return sk_resize(image_np, (int(height), int(width)))[..., :3]
 
 
 def resize_scalar(image_np, x_scale, y_scale):
